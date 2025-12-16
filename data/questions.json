@@ -1,0 +1,112 @@
+[
+  {
+    "id": 1,
+    "questiontext": "What is the capital of India?",
+    "optiona": "Mumbai",
+    "optionb": "New Delhi",
+    "optionc": "Bangalore",
+    "optiond": "Chennai",
+    "correctoption": "b",
+    "category": "Geography",
+    "difficulty": "easy"
+  },
+  {
+    "id": 2,
+    "questiontext": "Which planet is known as the Red Planet?",
+    "optiona": "Venus",
+    "optionb": "Mars",
+    "optionc": "Jupiter",
+    "optiond": "Saturn",
+    "correctoption": "b",
+    "category": "Science",
+    "difficulty": "easy"
+  },
+  {
+    "id": 3,
+    "questiontext": "What is 2 + 2?",
+    "optiona": "3",
+    "optionb": "4",
+    "optionc": "5",
+    "optiond": "6",
+    "correctoption": "b",
+    "category": "Mathematics",
+    "difficulty": "easy"
+  },
+  {
+    "id": 4,
+    "questiontext": "Who wrote Romeo and Juliet?",
+    "optiona": "Jane Austen",
+    "optionb": "Charles Dickens",
+    "optionc": "William Shakespeare",
+    "optiond": "Mark Twain",
+    "correctoption": "c",
+    "category": "Literature",
+    "difficulty": "medium"
+  },
+  {
+    "id": 5,
+    "questiontext": "What is the largest ocean?",
+    "optiona": "Atlantic Ocean",
+    "optionb": "Indian Ocean",
+    "optionc": "Arctic Ocean",
+    "optiond": "Pacific Ocean",
+    "correctoption": "d",
+    "category": "Geography",
+    "difficulty": "easy"
+  },
+  {
+    "id": 6,
+    "questiontext": "In which year did World War II end?",
+    "optiona": "1943",
+    "optionb": "1944",
+    "optionc": "1945",
+    "optiond": "1946",
+    "correctoption": "c",
+    "category": "History",
+    "difficulty": "medium"
+  },
+  {
+    "id": 7,
+    "questiontext": "What is the chemical symbol for Gold?",
+    "optiona": "Go",
+    "optionb": "Gd",
+    "optionc": "Au",
+    "optiond": "Ag",
+    "correctoption": "c",
+    "category": "Chemistry",
+    "difficulty": "medium"
+  },
+  {
+    "id": 8,
+    "questiontext": "Which country has the most population?",
+    "optiona": "India",
+    "optionb": "Indonesia",
+    "optionc": "United States",
+    "optiond": "Pakistan",
+    "correctoption": "a",
+    "category": "Geography",
+    "difficulty": "medium"
+  },
+  {
+    "id": 9,
+    "questiontext": "What is the speed of light?",
+    "optiona": "299,792 km/s",
+    "optionb": "199,792 km/s",
+    "optionc": "399,792 km/s",
+    "optiond": "99,792 km/s",
+    "correctoption": "a",
+    "category": "Physics",
+    "difficulty": "hard"
+  },
+  {
+    "id": 10,
+    "questiontext": "Which is the smallest country by area?",
+    "optiona": "Monaco",
+    "optionb": "Vatican City",
+    "optionc": "Liechtenstein",
+    "optiond": "San Marino",
+    "correctoption": "b",
+    "category": "Geography",
+    "difficulty": "hard"
+  }
+]
