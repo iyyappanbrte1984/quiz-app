@@ -1,0 +1,58 @@
+# .gitignore - Files to exclude from Git
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Node/NPM
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+package-lock.json
+yarn.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.sublime-project
+.sublime-workspace
+
+# Build Output
+dist/
+build/
+.next/
+out/
+
+# Cache
+.cache/
+.eslintcache
+.parcel-cache
+
+# Testing
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db
+.DS_Store
+*.log
+
+# Local Files
+local/
+temp/
+tmp/
+
+# Database Backups
+*.sql
+*.backup
+db_backup/
+
+# Sensitive Files
+secrets.json
+credentials.json

@@ -1,0 +1,18 @@
+# Quiz App - Environment Configuration
+
+# DO NOT commit this file to GitHub!
+# Add to .gitignore
+
+# Supabase Configuration
+VITE_SUPABASE_URL=https://qqmbquelvcupzngbowvs.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxbWJxdWVsdmN1cHpuZ2Jvd3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3ODM3NzgsImV4cCI6MjA4MTM1OTc3OH0.SumVLhNoXsxGaz711E2G6hq6vlxGXOLA2AhUqBdiTE
+
+# App Configuration
+VITE_APP_NAME=MCQ Quiz App
+VITE_APP_VERSION=1.0.0
+VITE_API_TIMEOUT=5000
+
+# Feature Flags
+VITE_ENABLE_DEMO_MODE=true
+VITE_ENABLE_ANALYTICS=false
+VITE_QUIZ_TIME_LIMIT=3600

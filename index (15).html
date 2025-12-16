@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Quiz App - Supabase Backend</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div>
+                <h1>📚 MCQ Quiz</h1>
+                <small class="subtitle">Powered by Supabase</small>
+            </div>
+            <div class="header-actions">
+                <div class="user-info" id="user-info"></div>
+                <button class="btn btn-danger" id="logout-btn" style="display: none;">Logout</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="content">
+
+            <!-- 1. Auth Card -->
+            <div class="card active" id="auth-card">
+                <div class="tabs">
+                    <button class="tab-btn active" id="tab-login">Login</button>
+                    <button class="tab-btn" id="tab-register">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="login-form">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" placeholder="Your password">
+                    </div>
+                    <button class="btn btn-primary btn-full" id="login-btn">Login</button>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-form" style="display: none;">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="reg-name" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="reg-email" placeholder="you@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="reg-password" placeholder="At least 6 characters">
+                    </div>
+                    <button class="btn btn-primary btn-full" id="register-btn">Register</button>
+                </div>
+
+                <div class="message" id="auth-message"></div>
+            </div>
+
+            <!-- 2. Quiz Card -->
+            <div class="card" id="quiz-card">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <div class="quiz-header">
+                    <span class="question-number" id="question-number">Question 1 / 100</span>
+                    <span class="timer" id="time-display">00:00</span>
+                </div>
+
+                <div class="question-text" id="question-text">Loading question...</div>
+
+                <div class="options" id="options-container">
+                    <!-- Options will be inserted here -->
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-secondary" id="prev-btn" onclick="window.quizApp.previousQuestion()">Previous</button>
+                    <button class="btn btn-primary" id="next-btn" onclick="window.quizApp.nextQuestion()">Next</button>
+                    <button class="btn btn-success" id="submit-btn" onclick="window.quizApp.finishQuiz()" style="display: none;">Submit Quiz</button>
+                </div>
+
+                <div class="message" id="quiz-message"></div>
+            </div>
+
+            <!-- 3. Results Card -->
+            <div class="card" id="results-card">
+                <div class="score-circle">
+                    <div class="score-value" id="score-value">0</div>
+                    <div class="score-subtext">out of <span id="total-questions-result">100</span></div>
+                </div>
+
+                <h2 style="text-align: center; color: #1f2937; margin: 20px 0 10px;">Quiz Complete!</h2>
+                <p style="text-align: center; color: #6b7280;">Your final score</p>
+
+                <div class="results-detail">
+                    <div class="result-item">
+                        <div class="result-number" id="correct-count">0</div>
+                        <div class="result-label">Correct</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-number" id="incorrect-count">0</div>
+                        <div class="result-label">Incorrect</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-number" id="percentage">0%</div>
+                        <div class="result-label">Score</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-number" id="time-spent">00:00</div>
+                        <div class="result-label">Time</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary btn-full" onclick="window.quizApp.restartQuiz()">Retake Quiz</button>
+                </div>
+
+                <div class="score-history" id="score-history" style="display: none;">
+                    <h3>Previous Attempts</h3>
+                    <ul class="score-list" id="score-list"></ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Supabase Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Import all modules -->
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/quiz.js"></script>
+    <script type="module" src="js/results.js"></script>
+    <script type="module" src="js/utils.js"></script>
+
+    <!-- Main Quiz App -->
+    <script type="module">
+        import { supabase } from './js/config.js'
+        import * as auth from './js/auth.js'
+        import * as quiz from './js/quiz.js'
+        import * as results from './js/results.js'
+        import * as utils from './js/utils.js'
+
+        // Quiz App State and Methods
+        window.quizApp = {
+            questions: [],
+            currentQuestionIndex: 0,
+            userAnswers: [],
+            quizStartTime: null,
+            timerInterval: null,
+            currentUser: null,
+
+            // Initialize on page load
+            async init() {
+                const user = await auth.getCurrentUser()
+                
+                if (user) {
+                    this.currentUser = user
+                    await this.showLoggedInState(user)
+                } else {
+                    this.showLoginState()
+                }
+
+                this.setupEventListeners()
+            },
+
+            // Setup event listeners
+            setupEventListeners() {
+                // Tab switching
+                document.getElementById('tab-login')?.addEventListener('click', () => {
+                    document.getElementById('login-form').style.display = 'block'
+                    document.getElementById('register-form').style.display = 'none'
+                    document.getElementById('tab-login').classList.add('active')
+                    document.getElementById('tab-register').classList.remove('active')
+                })
+
+                document.getElementById('tab-register')?.addEventListener('click', () => {
+                    document.getElementById('login-form').style.display = 'none'
+                    document.getElementById('register-form').style.display = 'block'
+                    document.getElementById('tab-login').classList.remove('active')
+                    document.getElementById('tab-register').classList.add('active')
+                })
+
+                // Login handler
+                document.getElementById('login-btn')?.addEventListener('click', async () => {
+                    const email = document.getElementById('login-email').value.trim()
+                    const password = document.getElementById('login-password').value
+
+                    if (!email || !password) {
+                        this.showMessage(document.getElementById('auth-message'), 'Please enter email and password', 'error')
+                        return
+                    }
+
+                    const result = await auth.loginUser(email, password)
+                    if (result.success) {
+                        this.currentUser = result.user
+                        this.showMessage(document.getElementById('auth-message'), '✅ Login successful!', 'success')
+                        setTimeout(() => this.showLoggedInState(result.user), 1000)
+                    } else {
+                        this.showMessage(document.getElementById('auth-message'), '❌ ' + result.error, 'error')
+                    }
+                })
+
+                // Register handler
+                document.getElementById('register-btn')?.addEventListener('click', async () => {
+                    const fullname = document.getElementById('reg-name').value.trim()
+                    const email = document.getElementById('reg-email').value.trim()
+                    const password = document.getElementById('reg-password').value
+
+                    if (!fullname || !email || !password) {
+                        this.showMessage(document.getElementById('auth-message'), 'Please fill all fields', 'error')
+                        return
+                    }
+
+                    if (password.length < 6) {
+                        this.showMessage(document.getElementById('auth-message'), 'Password must be at least 6 characters', 'error')
+                        return
+                    }
+
+                    const result = await auth.registerUser(email, password, fullname)
+                    if (result.success) {
+                        this.showMessage(document.getElementById('auth-message'), '✅ Registration successful! Check email to confirm.', 'success')
+                        setTimeout(() => {
+                            document.getElementById('tab-login').click()
+                            document.getElementById('login-email').value = email
+                        }, 2000)
+                    } else {
+                        this.showMessage(document.getElementById('auth-message'), '❌ ' + result.error, 'error')
+                    }
+                })
+
+                // Logout handler
+                document.getElementById('logout-btn')?.addEventListener('click', async () => {
+                    await auth.logoutUser()
+                    location.reload()
+                })
+            },
+
+            showLoginState() {
+                this.hideAllCards()
+                document.getElementById('auth-card').classList.add('active')
+            },
+
+            async showLoggedInState(user) {
+                const profile = await auth.getUserProfile(user.id)
+                if (profile.success) {
+                    document.getElementById('user-info').textContent = `👤 ${profile.data.fullname}`
+                    document.getElementById('user-info').classList.add('show')
+                }
+
+                this.hideAllCards()
+                document.getElementById('quiz-card').classList.add('active')
+                
+                await this.startQuiz()
+            },
+
+            async startQuiz() {
+                const result = await quiz.loadQuestions(100)
+                this.questions = result.data
+                this.userAnswers = new Array(this.questions.length).fill(null)
+                this.currentQuestionIndex = 0
+                this.quizStartTime = Date.now()
+
+                this.renderQuestion()
+                this.startTimer()
+            },
+
+            renderQuestion() {
+                if (this.currentQuestionIndex >= this.questions.length) {
+                    this.finishQuiz()
+                    return
+                }
+
+                const q = this.questions[this.currentQuestionIndex]
+                const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100
+
+                document.getElementById('progress-fill').style.width = progress + '%'
+                document.getElementById('question-number').textContent = 
+                    `Question ${this.currentQuestionIndex + 1} / ${this.questions.length}`
+                document.getElementById('question-text').textContent = q.questiontext
+
+                const optionsContainer = document.getElementById('options-container')
+                optionsContainer.innerHTML = ['optiona', 'optionb', 'optionc', 'optiond']
+                    .map((key, i) => {
+                        const letter = String.fromCharCode(97 + i)
+                        const isSelected = this.userAnswers[this.currentQuestionIndex] === letter
+                        return `
+                            <label class="option ${isSelected ? 'selected' : ''}">
+                                <input 
+                                    type="radio" 
+                                    name="answer" 
+                                    value="${letter}"
+                                    ${isSelected ? 'checked' : ''}
+                                    onchange="window.quizApp.selectAnswer('${letter}')"
+                                >
+                                ${q[key]}
+                            </label>
+                        `
+                    })
+                    .join('')
+
+                document.getElementById('prev-btn').disabled = this.currentQuestionIndex === 0
+                document.getElementById('next-btn').textContent = 
+                    this.currentQuestionIndex === this.questions.length - 1 ? 'Review' : 'Next'
+                document.getElementById('submit-btn').style.display = 
+                    this.currentQuestionIndex === this.questions.length - 1 ? 'inline-block' : 'none'
+            },
+
+            selectAnswer(letter) {
+                this.userAnswers[this.currentQuestionIndex] = letter
+            },
+
+            nextQuestion() {
+                if (this.currentQuestionIndex < this.questions.length - 1) {
+                    this.currentQuestionIndex++
+                    this.renderQuestion()
+                }
+            },
+
+            previousQuestion() {
+                if (this.currentQuestionIndex > 0) {
+                    this.currentQuestionIndex--
+                    this.renderQuestion()
+                }
+            },
+
+            startTimer() {
+                const timeDisplay = document.getElementById('time-display')
+                if (this.timerInterval) clearInterval(this.timerInterval)
+
+                this.timerInterval = setInterval(() => {
+                    if (!this.quizStartTime) return
+                    const sec = Math.floor((Date.now() - this.quizStartTime) / 1000)
+                    const m = String(Math.floor(sec / 60)).padStart(2, '0')
+                    const s = String(sec % 60).padStart(2, '0')
+                    timeDisplay.textContent = `${m}:${s}`
+                }, 1000)
+            },
+
+            async finishQuiz() {
+                if (this.timerInterval) clearInterval(this.timerInterval)
+
+                if (!this.currentUser) {
+                    alert('Please login first')
+                    return
+                }
+
+                let correctCount = 0
+                this.questions.forEach((q, i) => {
+                    if (this.userAnswers[i] === q.correctoption) {
+                        correctCount++
+                    }
+                })
+
+                const duration = Math.floor((Date.now() - this.quizStartTime) / 1000)
+                const percentage = Math.round((correctCount / this.questions.length) * 100)
+
+                const result = await results.saveQuizResult(
+                    this.currentUser.id,
+                    correctCount,
+                    this.questions.length,
+                    duration
+                )
+
+                if (result.success) {
+                    this.showResults(correctCount, percentage, duration)
+                } else {
+                    alert('Error saving results: ' + result.error)
+                }
+            },
+
+            async showResults(correctCount, percentage, duration) {
+                const minutes = Math.floor(duration / 60)
+                const seconds = duration % 60
+
+                document.getElementById('score-value').textContent = correctCount
+                document.getElementById('total-questions-result').textContent = this.questions.length
+                document.getElementById('correct-count').textContent = correctCount
+                document.getElementById('incorrect-count').textContent = this.questions.length - correctCount
+                document.getElementById('percentage').textContent = percentage + '%'
+                document.getElementById('time-spent').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+
+                this.hideAllCards()
+                document.getElementById('results-card').classList.add('active')
+
+                await this.loadScoreHistory()
+            },
+
+            async loadScoreHistory() {
+                if (!this.currentUser) return
+
+                const result = await results.getUserResults(this.currentUser.id, 5)
+                if (result.success && result.data.length > 1) {
+                    const historyEl = document.getElementById('score-history')
+                    const listEl = document.getElementById('score-list')
+                    historyEl.style.display = 'block'
+                    listEl.innerHTML = result.data.slice(1).map(r => `
+                        <li>
+                            <strong>${r.score}/${r.total_questions}</strong> 
+                            (${Math.round((r.score/r.total_questions)*100)}%) - 
+                            ${new Date(r.created_at).toLocaleDateString()} ${new Date(r.created_at).toLocaleTimeString()}
+                        </li>
+                    `).join('')
+                }
+            },
+
+            restartQuiz() {
+                this.hideAllCards()
+                document.getElementById('quiz-card').classList.add('active')
+                this.startQuiz()
+            },
+
+            hideAllCards() {
+                document.querySelectorAll('.card').forEach(card => card.classList.remove('active'))
+            },
+
+            showMessage(element, message, type) {
+                element.textContent = message
+                element.className = `message show ${type}`
+                setTimeout(() => element.classList.remove('show'), 5000)
+            }
+        }
+
+        // Initialize app on load
+        window.addEventListener('load', () => {
+            window.quizApp.init()
+        })
+    </script>
+</body>
+</html>
